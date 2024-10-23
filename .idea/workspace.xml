@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7f301d3b-0215-41fc-b44f-707afa54ceac" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/PyALM.egg-info/PKG-INFO" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyALM.egg-info/SOURCES.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyALM.egg-info/dependency_links.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyALM.egg-info/requires.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PyALM.egg-info/top_level.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-    </list>
+    <list default="true" id="7f301d3b-0215-41fc-b44f-707afa54ceac" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -223,7 +216,7 @@
       <workItem from="1729610279559" duration="10574000" />
       <workItem from="1729626427051" duration="2654000" />
       <workItem from="1729671296185" duration="11947000" />
-      <workItem from="1729698027811" duration="12243000" />
+      <workItem from="1729698027811" duration="12377000" />
     </task>
     <servers />
   </component>
