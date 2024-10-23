@@ -1,0 +1,14 @@
+LICENSE
+pyproject.toml
+rixarag/__init__.py
+rixarag/database.py
+rixarag/settings.py
+rixarag.egg-info/PKG-INFO
+rixarag.egg-info/SOURCES.txt
+rixarag.egg-info/dependency_links.txt
+rixarag.egg-info/requires.txt
+rixarag.egg-info/top_level.txt
+rixarag/parsing/__init__.py
+rixarag/parsing/image_captioning.py
+rixarag/parsing/latex.py
+rixarag/parsing/unstructured.py

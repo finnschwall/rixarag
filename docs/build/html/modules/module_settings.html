@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Settings &#8212; PyALM 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Database" href="module_database.html" />
+    <link rel="prev" title="Pipelines" href="module_pipelines.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="settings">
+<h1>Settings<a class="headerlink" href="#settings" title="Link to this heading">¶</a></h1>
+<p>Global settings</p>
+<section id="module-rixarag.settings">
+<span id="documentation"></span><h2>Documentation<a class="headerlink" href="#module-rixarag.settings" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.CHROMA_PERSISTENCE_PATH">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">CHROMA_PERSISTENCE_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#rixarag.settings.CHROMA_PERSISTENCE_PATH" title="Link to this definition">¶</a></dt>
+<dd><p>The path to the chroma database. If empty, the database will be stored in memory.
+But then it will be lost when the program is closed.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.CUSTOM_CHROMA_INIT">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">CUSTOM_CHROMA_INIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rixarag.settings.CUSTOM_CHROMA_INIT" title="Link to this definition">¶</a></dt>
+<dd><p>Set a function pointer to a custom initialization function for the chroma database.
+Can be used to connect to a remote</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.DELETE_THRESHOLD">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">DELETE_THRESHOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#rixarag.settings.DELETE_THRESHOLD" title="Link to this definition">¶</a></dt>
+<dd><p>Chunks/texts under this limit will not be stored in the database.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.EMBEDDING_MODEL">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">EMBEDDING_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'mixedbread-ai/mxbai-embed-large-v1'</span></em><a class="headerlink" href="#rixarag.settings.EMBEDDING_MODEL" title="Link to this definition">¶</a></dt>
+<dd><p>The model used for calculating embeddings.
+See [this](<a class="reference external" href="https://huggingface.co/spaces/mteb/leaderboard">https://huggingface.co/spaces/mteb/leaderboard</a>) leaderboard for more models.
+Especially for non-enlgish languages, you might want to choose a different model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.IMAGE_CAPTIONING_BACKEND">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">IMAGE_CAPTIONING_BACKEND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'openai'</span></em><a class="headerlink" href="#rixarag.settings.IMAGE_CAPTIONING_BACKEND" title="Link to this definition">¶</a></dt>
+<dd><p>The backend to use for image captioning. Choose between “openai” and “llamacpp”</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.LLAMACPP_IMAGE_MODEL">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">LLAMACPP_IMAGE_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'default'</span></em><a class="headerlink" href="#rixarag.settings.LLAMACPP_IMAGE_MODEL" title="Link to this definition">¶</a></dt>
+<dd><p>Path to the .gguf file to use for image captioning. Only relevant if IMAGE_CAPTIONING_BACKEND is set to “llamacpp”</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.OPENAI_IMAGE_MODEL">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">OPENAI_IMAGE_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gpt-4o-mini'</span></em><a class="headerlink" href="#rixarag.settings.OPENAI_IMAGE_MODEL" title="Link to this definition">¶</a></dt>
+<dd><p>The model to use for image captioning. Only relevant if IMAGE_CAPTIONING_BACKEND is set to “openai”</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyALM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="module_pipelines.html">Pipelines</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-rixarag.settings">Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module_database.html">Database</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="module_pipelines.html" title="previous chapter">Pipelines</a></li>
+      <li>Next: <a href="module_database.html" title="next chapter">Database</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Finn Schwall, Fraunhofer IOSB.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/modules/module_settings.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

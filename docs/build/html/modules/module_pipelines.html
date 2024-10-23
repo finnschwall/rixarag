@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Pipelines &#8212; PyALM 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script src="../_static/documentation_options.js?v=2709fde1"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Settings" href="module_settings.html" />
+    <link rel="prev" title="Welcome to rixarag’s documentation!" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pipelines">
+<h1>Pipelines<a class="headerlink" href="#pipelines" title="Link to this heading">¶</a></h1>
+<p>These pipelines provide an easy way to automatically parse and store documents (or a single one) in a vector database.
+They can be used outside the framework by simply setting return_chunks to True.</p>
+<section id="module-rixarag.pipelines">
+<span id="documentation"></span><h2>Documentation<a class="headerlink" href="#module-rixarag.pipelines" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="rixarag.pipelines.html_pipeline">
+<span class="sig-prename descclassname"><span class="pre">rixarag.pipelines.</span></span><span class="sig-name descname"><span class="pre">html_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_maximum_chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.pipelines.html_pipeline" title="Link to this definition">¶</a></dt>
+<dd><p>Process a html document (or documents) into chunks and store them in the vector database</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path to the html document or folder containing html documents</p></li>
+<li><p><strong>collection</strong> – Name of the collection in the database the chunks will be stored in</p></li>
+<li><p><strong>base_link</strong> – URL for single HTML file. For multiples this will be base_link/filename for each file</p></li>
+<li><p><strong>desired_chunk_size</strong> – Desired size of chunks in characters</p></li>
+<li><p><strong>hard_maximum_chunk_size</strong> – Hard upper limit for chunk size</p></li>
+<li><p><strong>fallback_strategy</strong> – Strategy to use if chunking fails. See regex_parser for options</p></li>
+<li><p><strong>return_chunks</strong> – Whether to return the processed chunks as a list instead of storing in the database</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None or list of processed chunks</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rixarag.pipelines.latex_pipeline">
+<span class="sig-prename descclassname"><span class="pre">rixarag.pipelines.</span></span><span class="sig-name descname"><span class="pre">latex_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">document_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">caption_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_pdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_maximum_chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fallback_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.pipelines.latex_pipeline" title="Link to this definition">¶</a></dt>
+<dd><p>Process a latex document (or documents) into chunks and store them in the vector database</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Path to the latex document or folder containing latex documents</p></li>
+<li><p><strong>document_title</strong> – Title of the document. If not provided, will attempt to extract from the document</p></li>
+<li><p><strong>collection</strong> – Name of the collection in the database the chunks will be stored in</p></li>
+<li><p><strong>caption_images</strong> – Whether to caption images in the document. Experimental</p></li>
+<li><p><strong>working_directory</strong> – Directory to save processed chunks to. Smart if tex is large to avoid reprocessing</p></li>
+<li><p><strong>original_pdf</strong> – Path to the original PDF. If provided, will attempt to match chunks to pages in the PDF</p></li>
+<li><p><strong>desired_chunk_size</strong> – Desired size of chunks in characters</p></li>
+<li><p><strong>hard_maximum_chunk_size</strong> – Hard upper limit for chunk size</p></li>
+<li><p><strong>fallback_strategy</strong> – Strategy to use if chunking fails. See regex_parser for options</p></li>
+<li><p><strong>return_chunks</strong> – Whether to return the processed chunks as a list instead of storing in the database</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None or list of processed chunks</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyALM</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-rixarag.pipelines">Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module_settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_database.html">Database</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">Welcome to rixarag’s documentation!</a></li>
+      <li>Next: <a href="module_settings.html" title="next chapter">Settings</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Finn Schwall, Fraunhofer IOSB.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/modules/module_pipelines.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
