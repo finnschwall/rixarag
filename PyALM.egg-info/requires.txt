@@ -1,3 +1,0 @@
-unstructured_ingest
-chromadb
-openai
