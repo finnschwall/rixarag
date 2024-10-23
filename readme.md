@@ -55,5 +55,11 @@ import rixarag
 rixarag.settings.CHROMA_PERSISTENCE_PATH = "path/to/where/you/want/to/store/chroma"
 ```
 
+### Just want to use` this for my own database
+Set the `return_chunks` parameter to `True` in the pipeline functions.
+
+Otherwise, to get .json set the `working_directory` parameter to a folder. But this just
+saves the chunks as .json files.
+
 ## Documentation
 For a full documentation, see the [documentation](https://finnschwall.github.io/rixarag/).
