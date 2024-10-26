@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Database &#8212; PyALM 0.1 documentation</title>
+    <title>Database &#8212; rixarag 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
@@ -13,6 +13,7 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Webscraper" href="module_tools.html" />
     <link rel="prev" title="Settings" href="module_settings.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -47,6 +48,11 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rixarag.database.GPUEmbeddings._is_protocol">
 <span class="sig-name descname"><span class="pre">_is_protocol</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#rixarag.database.GPUEmbeddings._is_protocol" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rixarag.database.GPUEmbeddings.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.GPUEmbeddings.encode" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -104,9 +110,30 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="rixarag.database.get_random_elements">
+<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">get_random_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.get_random_elements" title="Link to this definition">¶</a></dt>
+<dd><p>Get random elements from the ChromaDB</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>count</strong> – the number of elements to return</p></li>
+<li><p><strong>collection_name</strong> – the name of the collection to query</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="rixarag.database.list_collections">
-<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">list_collections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.list_collections" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">list_collections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.list_collections" title="Link to this definition">¶</a></dt>
 <dd><p>List all collections in the db</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rixarag.database.load_model">
+<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">load_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.load_model" title="Link to this definition">¶</a></dt>
+<dd><p>Just load the model. Useful to reserve GPU memory
+:return:</p>
 </dd></dl>
 
 <dl class="py function">
@@ -117,18 +144,52 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rixarag.database.query">
-<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.query" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.query" title="Link to this definition">¶</a></dt>
 <dd><p>Query the ChromaDB</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>query</strong> – the query string</p></li>
-<li><p><strong>collection_name</strong> – the name of the collection to query</p></li>
+<li><p><strong>collection</strong> – the name of the collection to query</p></li>
 <li><p><strong>n_results</strong> – the number of results to return</p></li>
+<li><p><strong>max_distance</strong> – Entries with distances larger than this will be filtered out</p></li>
 <li><p><strong>kwargs</strong> – additional keyword arguments to pass to the query function of chromadb</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rixarag.database.query_by_metadata">
+<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">query_by_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.query_by_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Query the ChromaDB for entries where metadata[key] == value</p>
+<p>For more advanced queries use the chroma client and the where statement directly
+See here <a class="reference external" href="https://docs.trychroma.com/guides#using-where-filters">https://docs.trychroma.com/guides#using-where-filters</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query_dict</strong> – a dictionary of key-value pairs to query for. E.g. if you search for images use {“type”: “image”}
+and if you search for images from the document with id 123 use {“document_id”: 123, “type”: “image”}</p></li>
+<li><p><strong>collection</strong> – the name of the collection to query</p></li>
+<li><p><strong>n_results</strong> – the number of results to return</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rixarag.database.query_inverted">
+<span class="sig-prename descclassname"><span class="pre">rixarag.database.</span></span><span class="sig-name descname"><span class="pre">query_inverted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.database.query_inverted" title="Link to this definition">¶</a></dt>
+<dd><p>Returns same content as query. However query returns a dict with lists as values, this returns a list of dicts
+Also this supports maximum_chars as an alternative to n_results.</p>
+<p>It also flattens the metadatas into the main dict and renames elements to be more intuitive
+:param query_str:
+:param collection:
+:param n_results: Maximum number of results to return. If specified with maximum_chars, this will set an alternative upper limit.
+:param max_distance:
+:param maximum_chars: When maximum chars is set it will return the minimum set of chunks that have in total less than maximum_chars characters.
+:param kwargs:
+:return:</p>
 </dd></dl>
 
 </section>
@@ -141,7 +202,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">PyALM</a></h1>
+<h1 class="logo"><a href="../index.html">rixarag</a></h1>
 
 
 
@@ -158,6 +219,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-rixarag.database">Documentation</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="module_tools.html">Webscraper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_regex_parser.html">Regex Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_pdf_page_matcher.html">Regex Parser</a></li>
 </ul>
 
 <div class="relations">
@@ -165,6 +229,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="module_settings.html" title="previous chapter">Settings</a></li>
+      <li>Next: <a href="module_tools.html" title="next chapter">Webscraper</a></li>
   </ul></li>
 </ul>
 </div>

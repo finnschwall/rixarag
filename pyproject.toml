@@ -19,7 +19,8 @@ dependencies = [
     "openai",
     "markdownify",
     "numpy",
-    "sentence_transformers"
+    "sentence_transformers",
+    "pymupdf"
 ]
 
 

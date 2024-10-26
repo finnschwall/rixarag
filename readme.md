@@ -12,6 +12,7 @@ but works standalone.
 - HTML -> chunks
 - Markdown -> chunks
 - Wikipedia XML -> chunks
+- Docx, ODT and other formats -> chunks (requires pandoc)
 - And of course: A database where to store and retrieve the chunks
 - Multimodal support: Automatically transcribe and embedd images
 - Use any document with the "unstructured" API (bring your own key)
@@ -25,14 +26,34 @@ pip3 install git+https://github.com/finnschwall/rixarag.git
 (PIP coming)
 
 ## Example
-### HTML or Markdown
-Turn a whole folder of HTML scraped from the internet into embeddings:
+### Markdown
+Turn a whole folder of markdown files (or just one file) from the internet into embeddings:
+
 ```python
 from rixarag import pipelines
-pipelines.html_pipeline("PATH_TO_FOLDER", base_link="https://www.where_you_scraped_from.com")
+
+pipelines.markdown_pipeline("PATH_TO_FOLDER")
 ```
-And that's it! You can now query the database for the websites contents.
-Usage for single file is the same. For Markdown choose the markdown_pipeline.
+### HTML
+Turn a whole folder of HTML files (or just one file) from the internet into embeddings:
+```python
+from rixarag import pipelines
+pipelines.html_pipeline("PATH_TO_FOLDER")
+```
+
+Look at the docs for how to add the urls or other features.
+
+### HTML from a website
+Turn a website into embeddings:
+```python
+from rixarag.tools import webscraper
+scraper = webscraper.Webscraper("URL_TO_SCRAPE", "PATH_TO_STORE_HTML", delay=0.1)
+scraper.scrape()
+from rixarag import pipelines
+pipelines.html_pipeline("PATH_TO_STORE_HTML")
+```
+See documentation for more control (e.g. scraping really everything)
+
 ### Latex
 Turn a whole folder of Latex files (e.g. a book source) into embeddings:
 ```python
@@ -40,8 +61,8 @@ from rixarag import pipelines
 chunks = pipelines.latex_pipeline("PATH_TO_FOLDER",document_title="How the books called", 
         original_pdf = "PATH_TO_COMPILED_PDF")
 ```
-If you don't provide the original PDF, everything still works, but you can't get the page numbers.
-Usage for single file is the same.
+You dont need to provide the original PDF. However if you do the chunker will attempt to give page numbers to the chunks.
+
 
 ### Wikipedia
 Coming
@@ -54,8 +75,10 @@ Coming
 import rixarag
 rixarag.settings.CHROMA_PERSISTENCE_PATH = "path/to/where/you/want/to/store/chroma"
 ```
+### Using GPU
+Will do automatically, if pytorch is installed with CUDA support.
 
-### Just want to use` this for my own database
+### Just want to use this for my own database
 Set the `return_chunks` parameter to `True` in the pipeline functions.
 
 Otherwise, to get .json set the `working_directory` parameter to a folder. But this just

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Settings &#8212; PyALM 0.1 documentation</title>
+    <title>Settings &#8212; rixarag 0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
     <script src="../_static/documentation_options.js?v=2709fde1"></script>
@@ -58,10 +58,18 @@ Can be used to connect to a remote</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="rixarag.settings.EMBEDDING_MODEL">
-<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">EMBEDDING_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'mixedbread-ai/mxbai-embed-large-v1'</span></em><a class="headerlink" href="#rixarag.settings.EMBEDDING_MODEL" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">EMBEDDING_MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sentence-transformers/all-MiniLM-L6-v2'</span></em><a class="headerlink" href="#rixarag.settings.EMBEDDING_MODEL" title="Link to this definition">¶</a></dt>
 <dd><p>The model used for calculating embeddings.
 See [this](<a class="reference external" href="https://huggingface.co/spaces/mteb/leaderboard">https://huggingface.co/spaces/mteb/leaderboard</a>) leaderboard for more models.
 Especially for non-enlgish languages, you might want to choose a different model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rixarag.settings.FORCE_DEVICE">
+<span class="sig-prename descclassname"><span class="pre">rixarag.settings.</span></span><span class="sig-name descname"><span class="pre">FORCE_DEVICE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#rixarag.settings.FORCE_DEVICE" title="Link to this definition">¶</a></dt>
+<dd><p>Will manually set the device= of the sentence transformer model.
+If none sentence transformer will choose the device automatically.
+Can be used e.g. to prevent the model from using the GPU.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -92,7 +100,7 @@ Especially for non-enlgish languages, you might want to choose a different model
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">PyALM</a></h1>
+<h1 class="logo"><a href="../index.html">rixarag</a></h1>
 
 
 
@@ -109,6 +117,9 @@ Especially for non-enlgish languages, you might want to choose a different model
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="module_database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_tools.html">Webscraper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_regex_parser.html">Regex Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_pdf_page_matcher.html">Regex Parser</a></li>
 </ul>
 
 <div class="relations">

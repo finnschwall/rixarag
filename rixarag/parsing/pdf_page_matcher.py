@@ -126,10 +126,13 @@ class PDFLatexMatcher:
 
         for chunk_idx in range(len(self.chunks)):
             if self.page_assignments[chunk_idx] is not None:
-                page_label = self.pdf_doc[self.page_assignments[chunk_idx]].get_label()
-                if page_label is None or page_label == "":
-                    page_label = str(self.page_assignments[chunk_idx]+1)
-                return_chunks.append(page_label)
+                try:
+                    page_label = self.pdf_doc[self.page_assignments[chunk_idx]].get_label()
+                    if page_label is None or page_label == "":
+                        page_label = str(self.page_assignments[chunk_idx]+1)
+                    return_chunks.append(page_label)
+                except:
+                    return_chunks.append("Unexpected error")
                 continue
 
             prev_idx, next_idx = None, None
@@ -148,14 +151,17 @@ class PDFLatexMatcher:
                     next_idx = i
                     next_page = self.page_assignments[i]
                     break
-            if next_page is not None:
-                next_page_label = self.pdf_doc[next_page].get_label()
-                if next_page_label is None or next_page_label == "":
-                    next_page_label = str(next_page+1)
-            if prev_page is not None:
-                prev_page_label = self.pdf_doc[prev_page].get_label()
-                if prev_page_label is None or prev_page_label == "":
-                    prev_page_label = str(prev_page+1)
+            try:
+                if next_page is not None:
+                    next_page_label = self.pdf_doc[next_page].get_label()
+                    if next_page_label is None or next_page_label == "":
+                        next_page_label = str(next_page+1)
+                if prev_page is not None:
+                    prev_page_label = self.pdf_doc[prev_page].get_label()
+                    if prev_page_label is None or prev_page_label == "":
+                        prev_page_label = str(prev_page+1)
+            except:
+                return_chunks.append("Unexpected error")
             if prev_page is not None and next_page is not None:
                 self.page_assignments[chunk_idx] = prev_page
                 return_chunks.append(next_page_label if next_page == prev_page else f"{prev_page_label}-{next_page_label}")

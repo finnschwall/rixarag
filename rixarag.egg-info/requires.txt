@@ -1,3 +1,6 @@
 unstructured_ingest
 chromadb
 openai
+markdownify
+numpy
+sentence_transformers

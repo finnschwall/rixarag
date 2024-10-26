@@ -4,6 +4,10 @@ from dataclasses import dataclass
 from enum import Enum
 import numpy as np
 
+def generate_id(text):
+    # hopefully collision free
+    return str(int(abs(hash(text))%2e7))
+
 
 class Granularity(str, Enum):
     COARSE = "coarse"  # Major structural elements (chapter, section, subsection)
@@ -71,10 +75,9 @@ class RegexChunker:
         """
         Initialize the LaTeX chunker with configurable length constraints.
 
-        Args:
-            min_chunk_length: Minimum length for a chunk before merging
-            max_chunk_length: Maximum length for any chunk
-            custom_separators: Optional dictionary of custom separator patterns
+        :param min_chunk_length: Minimum length for a chunk before merging
+        :param max_chunk_length: Maximum length for any chunk
+        :param custom_separators: Optional dictionary of custom separator patterns
         """
         self.min_chunk_length = min_chunk_length
         self.max_chunk_length = max_chunk_length
@@ -249,16 +252,14 @@ class RegexChunker:
         """
         Split LaTeX document into chunks based on specified granularity.
 
-        Args:
-            text: Input LaTeX document text
-            granularity: Granularity level for splitting
-                COARSE: Major structural elements (chapter, section)
-                MEDIUM: Minor structural elements (paragraph)
-                FINE: List items, environments
-                FINEST: Paragraphs (double newlines)
 
-        Returns:
-            List of Chunk objects containing the split document
+        :param text: Input LaTeX document text
+        :param granularity: Granularity level for splitting
+            COARSE: Major structural elements (chapter, section)
+            MEDIUM: Minor structural elements (paragraph)
+            FINE: List items, environments
+            FINEST: Paragraphs (double newlines)
+        :returns: List of Chunk objects containing the split document
         """
         # Get appropriate separators for this granularity level
         active_separators = self._get_active_separators(granularity)
@@ -306,12 +307,11 @@ def merge_small_chunks(chunks: List[Chunk], min_size: int) -> List[Chunk]:
     Merges consecutive chunks smaller than min_size into larger chunks.
     Processes the list from start to finish.
 
-    Args:
-        chunks: List of Chunk objects to process
-        min_size: Minimum size threshold for chunks
 
-    Returns:
-        List of merged Chunk objects
+    :param chunks: List of Chunk objects to process
+    :param min_size: Minimum size threshold for chunks
+
+    :return: List of merged Chunk objects
     """
     if not chunks:
         return []
@@ -452,6 +452,7 @@ def automatic_chunking(latex_text: str, desired_chunk_size: int = 1000, hard_max
                 too_large = True
                 break
     if too_large:
+        print("Some chunks are too large. Applying fallback strategy. Consider checking the output")
         for index in reversed(range(len(chunks))):
             chunk = chunks[index]
             if chunk.size > hard_maximum_chunk_size:
@@ -496,7 +497,8 @@ def chunks_to_db_chunks_latex(chunks: List[Chunk], document_title, original_pdf=
             metadata["original_file"] = original_file
         db_chunks.append({
             "text": chunk.content,
-            "metadata": metadata
+            "metadata": metadata,
+            "id": generate_id(chunk.content)#hex(abs(hash(chunk.content)))[2:]
         })
     if original_pdf is not None:
         from . import pdf_page_matcher
@@ -504,11 +506,11 @@ def chunks_to_db_chunks_latex(chunks: List[Chunk], document_title, original_pdf=
         page_assignments = matcher.match_chunks_to_pages()
         matcher.close()
         for i, chunk in enumerate(db_chunks):
-            chunk["metadata"]["page_number"] = page_assignments[i]
+            chunk["metadata"]["page"] = page_assignments[i]
     return db_chunks
 
 
-def chunks_to_db_chunks_html(chunks: List[Chunk], title, url = None) -> List[Dict[str, Union[str, int]]]:
+def chunks_to_db_chunks_html(chunks: List[Chunk], title) -> List[Dict[str, Union[str, int]]]:
     """
     Converts a list of Chunk objects from the latex parser into a format to be fed into the database.
     """
@@ -517,11 +519,77 @@ def chunks_to_db_chunks_html(chunks: List[Chunk], title, url = None) -> List[Dic
     for chunk in chunks:
         metadata = {"size":chunk.size, "type":"text", "source_type":"html",
                     "document_title": title}
-        if url:
-            metadata["url"] = url
         db_chunks.append({
             "text": chunk.content,
-            "metadata": metadata
+            "metadata": metadata,
+            "id": generate_id(chunk.content)#hex(abs(hash(chunk.content)))[2:]
         })
 
     return db_chunks
+
+
+def extract_heading(markdown_text: str) -> str:
+    """
+    Extract a heading from markdown text using various methods.
+    Returns 'unknown' if no heading can be found.
+
+    Methods tried (in order):
+    1. Alternate heading syntax (=== or ---)
+    2. Hash-style headers (#)
+    3. First non-empty line
+    """
+    if not markdown_text or not isinstance(markdown_text, str):
+        return "unknown"
+
+    # Split into lines and remove empty ones
+    lines = [line.strip() for line in markdown_text.splitlines()]
+    lines = [line for line in lines if line]
+
+    if not lines:
+        return "unknown"
+
+    # Method 1: Check for alternate heading syntax (=== or ---)
+    for i in range(len(lines) - 1):
+        current_line = lines[i]
+        next_line = lines[i + 1]
+
+        # Check if next line is all = or -
+        if (set(next_line) == {'='} and len(next_line) >= 3) or \
+                (set(next_line) == {'-'} and len(next_line) >= 3):
+            return current_line
+
+    # Method 2: Look for hash-style headers
+    for line in lines:
+        # Match any number of #s followed by space and text
+        if line.startswith('#'):
+            # Remove #s and spaces from start
+            heading = line.lstrip('#').strip()
+            if heading:  # Ensure there's text after the #s
+                return heading
+
+    # Method 3: Smart fallback - look for the first meaningful line
+    for line in lines:
+        # Skip likely non-heading lines
+        if any(line.startswith(x) for x in ['>', '-', '*', '1.', '```', '    ']):
+            continue
+        # Skip lines that are too long (likely paragraphs)
+        if len(line) > 100:
+            continue
+        # Skip lines that are all special characters
+        if all(not c.isalnum() for c in line):
+            continue
+        return line
+
+    return "unknown"
+
+
+def clean_md(markdown):
+    # get rid of excessive things that can appear either in the title or to weird conversion
+    # especially long titles mess up character counting and we dont match for the full length anyway
+    pattern = r'\n{4,}'
+    markdown = re.sub(pattern, '\n\n\n', markdown)
+    pattern = r'-{5,}'
+    markdown = re.sub(pattern, '----', markdown)
+    pattern = r'={5,}'
+    markdown = re.sub(pattern, '====', markdown)
+    return markdown

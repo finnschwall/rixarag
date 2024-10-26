@@ -2,6 +2,7 @@ LICENSE
 pyproject.toml
 rixarag/__init__.py
 rixarag/database.py
+rixarag/pipelines.py
 rixarag/settings.py
 rixarag.egg-info/PKG-INFO
 rixarag.egg-info/SOURCES.txt
@@ -10,5 +11,8 @@ rixarag.egg-info/requires.txt
 rixarag.egg-info/top_level.txt
 rixarag/parsing/__init__.py
 rixarag/parsing/image_captioning.py
-rixarag/parsing/latex.py
+rixarag/parsing/pdf_page_matcher.py
+rixarag/parsing/regex_parser.py
+rixarag/parsing/semantic_chunking.py
 rixarag/parsing/unstructured.py
+rixarag/parsing/wikipedia.py

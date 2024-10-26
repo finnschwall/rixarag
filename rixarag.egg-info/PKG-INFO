@@ -13,3 +13,6 @@ License-File: LICENSE
 Requires-Dist: unstructured_ingest
 Requires-Dist: chromadb
 Requires-Dist: openai
+Requires-Dist: markdownify
+Requires-Dist: numpy
+Requires-Dist: sentence_transformers
