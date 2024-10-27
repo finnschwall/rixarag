@@ -1,13 +1,18 @@
 import re
 import xml.etree.ElementTree as ET
+import sys
+
 
 def parse_wiki_xml(path):
     """
     Chunk a wikipedia xml file.
     These can be obtained from here https://en.wikipedia.org/wiki/Special:Export
-
-
     """
+    # check for python version
+    if sys.version_info[0] < 3 or sys.version_info[1] < 11:
+        raise Exception("Python 3.11 or higher is required for the wikipedia parser")
+
+    from . import regex_parser
     tree = ET.parse(path)
     root = tree.getroot()
     entities = []
@@ -64,8 +69,15 @@ def parse_wiki_xml(path):
             text = re.sub(r"<ref>(.*?)</ref>", '', text)
             text = re.sub(r"\'\'\'(.*?)\'\'\'", r"'\1'", text)
             text = re.sub(r"\'\'(.*?)\'\'", r"'\1'", text)
-            entity = {"header": title, "content": i + ":\n" + text,
-                      "url": f"https://en.wikipedia.org/?curid={id}#" + "_".join(i.split(" ")),
-                      "subheader": i}
+            # entity = {"header": title, "content": i + ":\n" + text,
+            #           "url": f"https://en.wikipedia.org/?curid={id}#" + "_".join(i.split(" ")),
+            #           "subheader": i}
+            content = i + ":\n" + text
+            metadata = {"id":regex_parser.generate_id(content),
+                        "url": f"https://en.wikipedia.org/?curid={id}#" + "_".join(i.split(" ")),
+                        "document_title" : title, "title": i, "source": "wikipedia",
+                        "content_type": "text"
+                        }
+            entity = {"text": content, "metadata": metadata}
             entities.append(entity)
     return entities

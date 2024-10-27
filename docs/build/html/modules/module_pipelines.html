@@ -127,17 +127,41 @@ The correct pipeline for each directory is based on the present file types.
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="rixarag.pipelines.read_jsons">
+<span class="sig-prename descclassname"><span class="pre">rixarag.pipelines.</span></span><span class="sig-name descname"><span class="pre">read_jsons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_is_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.pipelines.read_jsons" title="Link to this definition">¶</a></dt>
+<dd><p>Search a directory and all its subdirectories for json files.</p>
+<p>The JSON files are here assumed to consist of chunks with either “text” or “content” keys.
+All other keys are considered metadata.
+:param path:
+:param collection:
+:param first_is_metadata: Assume the first entry in the JSON file is metadata that applies to all chunks inside the file
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="rixarag.pipelines.unstructured_loader_pipeline">
 <span class="sig-prename descclassname"><span class="pre">rixarag.pipelines.</span></span><span class="sig-name descname"><span class="pre">unstructured_loader_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unstructured_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">document_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.pipelines.unstructured_loader_pipeline" title="Link to this definition">¶</a></dt>
 <dd><p>Load a json output from the unstructured API and process it into the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>unstructured_path</strong> – </p>
+<dd class="field-odd"><p><strong>unstructured_path</strong> – JSON file from the unstructured API</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rixarag.pipelines.wikipedia_pipeline">
+<span class="sig-prename descclassname"><span class="pre">rixarag.pipelines.</span></span><span class="sig-name descname"><span class="pre">wikipedia_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_chunks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rixarag.pipelines.wikipedia_pipeline" title="Link to this definition">¶</a></dt>
+<dd><p>Process a wikipedia xml file.
+These can be obtained from here <a class="reference external" href="https://en.wikipedia.org/wiki/Special:Export">https://en.wikipedia.org/wiki/Special:Export</a></p>
+<p>Due to a requirement on new abilities of the default regex library, this function requires Python 3.11 or higher.
+:param path: Path to the wikipedia xml file
+:param collection: Name of the collection in the database the chunks will be stored in
+:param return_chunks: Whether to return the processed chunks as a list instead of storing in the database
+:return:</p>
 </dd></dl>
 
 </section>
@@ -204,7 +228,7 @@ The correct pipeline for each directory is based on the present file types.
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2023, Finn Schwall, Fraunhofer IOSB.
+      &copy;2024, Finn Schwall, Fraunhofer IOSB.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>

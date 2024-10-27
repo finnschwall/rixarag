@@ -294,6 +294,8 @@ def html_pipeline(path=None, html_texts: List = None, collection="default", base
             html_texts = [html_texts]
         html_contents = html_texts
     else:
+        if path:
+            raise ValueError("No .html files found")
         raise ValueError("No path or html text(s) provided")
     return markdown_pipeline(markdown_texts=html_contents, collection=collection, desired_chunk_size=desired_chunk_size,
                       hard_maximum_chunk_size=hard_maximum_chunk_size, fallback_strategy=fallback_strategy,
@@ -369,6 +371,23 @@ def read_directories(path, collection="default"):
             print(path)
 
 
+def wikipedia_pipeline(path, collection="default", return_chunks=False):
+    """
+    Process a wikipedia xml file.
+    These can be obtained from here https://en.wikipedia.org/wiki/Special:Export
+
+    Due to a requirement on new abilities of the default regex library, this function requires Python 3.11 or higher.
+    :param path: Path to the wikipedia xml file
+    :param collection: Name of the collection in the database the chunks will be stored in
+    :param return_chunks: Whether to return the processed chunks as a list instead of storing in the database
+    :return:
+    """
+    from .parsing import wikipedia
+    chunks = wikipedia.parse_wiki_xml(path)
+    if return_chunks:
+        return chunks
+    database.add_processed_chunks(chunks, collection)
+
 
 
 def unstructured_loader_pipeline(unstructured_path, embed_images=False, collection="default",
@@ -377,7 +396,7 @@ def unstructured_loader_pipeline(unstructured_path, embed_images=False, collecti
     """
     Load a json output from the unstructured API and process it into the database
 
-    :param unstructured_path:
+    :param unstructured_path: JSON file from the unstructured API
     :return:
     """
     with open(unstructured_path, "rb") as f:
@@ -415,3 +434,64 @@ def unstructured_loader_pipeline(unstructured_path, embed_images=False, collecti
         return processed_chunks
     print("Will now calulate embeddings and transfer into database. This may take a while...")
     database.add_processed_chunks(processed_chunks, collection)
+
+
+def read_jsons(path, collection, first_is_metadata=True, skip_keys=None):
+    """
+    Search a directory and all its subdirectories for json files.
+
+    The JSON files are here assumed to consist of chunks with either "text" or "content" keys.
+    All other keys are considered metadata.
+    :param path:
+    :param collection:
+    :param first_is_metadata: Assume the first entry in the JSON file is metadata that applies to all chunks inside the file
+    :return:
+    """
+    failed_paths = []
+    count = 0
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if file.endswith(".json"):
+                try:
+                    with open(os.path.join(root, file), "rb") as f:
+                        data = f.read()
+                    entries = json.loads(data)
+                    if first_is_metadata:
+                        metadata = entries[0]
+                        entries = entries[1:]
+                    else:
+                        metadata = {}
+                    chunks = []
+                    for entry in entries:
+                        chunk = {"text": entry["text"] if "text" in entry else entry["content"], "metadata": metadata.copy()}
+                        # now we add any other keys as metadata
+                        for key in entry:
+                            if key not in ["text", "content"]:
+                                chunk["metadata"][key] = entry[key]
+                        rename_dic = {"source_url": "url", "header": "title"}
+                        for old, new in rename_dic.items():
+                            if old in chunk["metadata"]:
+                                chunk["metadata"][new] = chunk["metadata"][old]
+                                del chunk["metadata"][old]
+                        if "tags" in chunk["metadata"]:
+                            chunk["metadata"]["tags"] = ",".join(chunk["metadata"]["tags"])
+                        chunk["metadata"]["size"] = len(chunk["text"])
+                        if skip_keys:
+                            for key in skip_keys:
+                                if key in chunk["metadata"]:
+                                    del chunk["metadata"][key]
+                        chunk["id"] = regex_parser.generate_id(chunk["text"])
+                        chunks.append(chunk)
+                    print(f"Processing {file} with {len(chunks)} chunks")
+                    database.add_processed_chunks(chunks, collection)
+                    count += 1
+                except Exception as e:
+                    print(f"Error processing {os.path.join(root, file)}. Skipping...")
+                    print(e)
+                    raise e
+                    failed_paths.append(root)
+    print(f"Finished! Processed {count} json files.")
+    if len(failed_paths) > 0:
+        print("------\nFailed to process the following directories:")
+        for path in failed_paths:
+            print(path)

@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'rixarag'
-copyright = '2023, Finn Schwall, Fraunhofer IOSB'
+copyright = '2024, Finn Schwall, Fraunhofer IOSB'
 author = 'Finn Schwall'
 version = '0.1'
 release = '0.1'
