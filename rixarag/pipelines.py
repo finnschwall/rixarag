@@ -488,7 +488,6 @@ def read_jsons(path, collection, first_is_metadata=True, skip_keys=None):
                 except Exception as e:
                     print(f"Error processing {os.path.join(root, file)}. Skipping...")
                     print(e)
-                    raise e
                     failed_paths.append(root)
     print(f"Finished! Processed {count} json files.")
     if len(failed_paths) > 0:

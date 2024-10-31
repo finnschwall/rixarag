@@ -184,12 +184,13 @@ def query(query_str: str, collection="default", n_results: int = 5, max_distance
 def query_inverted(query_str: str, collection="default", n_results: int = None, max_distance = 0.75,
                    kwargs: Dict[str, Any] = {}, maximum_chars=4000):
     """
-    Returns same content as query. However query returns a dict with lists as values, this returns a list of dicts
+    Query returns a dict with lists as values, this returns a list of dicts
     Also this supports maximum_chars as an alternative to n_results.
+    Can also query multiple collections at once.
 
     It also flattens the metadatas into the main dict and renames elements to be more intuitive
     :param query_str:
-    :param collection:
+    :param collection: string or list of strings. If list, it will query all collections and return the most relevant results.
     :param n_results: Maximum number of results to return. If specified with maximum_chars, this will set an alternative upper limit.
     :param max_distance:
     :param maximum_chars: When maximum chars is set it will return the minimum set of chunks that have in total less than maximum_chars characters.
@@ -201,38 +202,60 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
     temp_n_results = n_results
     if maximum_chars:
         # assume 700 chars per chunk and account for variation
-        n_results = maximum_chars//700 + 3
-    results = query(query_str, collection, n_results, max_distance, kwargs)
-    if not results or not any(results.values()):
-        return []
-    if "included" in results:
-        del results["included"]
-    length = len(results["ids"])
-    if length == 0:
-        return []
-    maximum = length
-    if maximum_chars:
-        cumsizes = np.cumsum([len(i) for i in results["documents"]])
-        maximum = np.searchsorted(cumsizes, maximum_chars)
-    if temp_n_results:
-        maximum = min(maximum, temp_n_results)
-    inverted = []
-    for i in range(maximum):
-        entry = {}
-        for key, value in results.items():
-            if value:
-                entry[key] = value[i]
-        inverted.append(entry)
+        n_results = maximum_chars//700 + 5
+    results_arr = []
+    if isinstance(collection, list):
+        n_results = n_results // len(collection)
+        for col in collection:
+            results = query(query_str, col, n_results, max_distance, kwargs)
+            results_arr.append(results)
+    else:
+        results = query(query_str, collection, n_results, max_distance, kwargs)
+        results_arr.append(results)
+    flattened = []
+    for results in results_arr:
+        if not results or not any(results.values()):
+            continue
+        if "included" in results:
+            del results["included"]
+        length = len(results["ids"])
+        if length == 0:
+            continue
 
-    for i in range(maximum):
-        inverted[i].update(inverted[i]["metadatas"])
-        del inverted[i]["metadatas"]
-    rename_dic = {"ids": "id", "documents": "content",  "distances": "distance", "embeddings": "embedding"}
-    for entry in inverted:
-        for key, value in rename_dic.items():
-            if key in entry:
-                entry[value] = entry.pop(key)
-    return inverted
+        inverted = []
+        for i in range(length):
+            entry = {}
+            for key, value in results.items():
+                if value:
+                    entry[key] = value[i]
+            inverted.append(entry)
+
+        for i in range(length):
+            inverted[i].update(inverted[i]["metadatas"])
+            del inverted[i]["metadatas"]
+
+        rename_dic = {"ids": "id", "documents": "content",  "distances": "distance", "embeddings": "embedding"}
+        for entry in inverted:
+            for key, value in rename_dic.items():
+                if key in entry:
+                    entry[value] = entry.pop(key)
+        flattened.extend(inverted)
+    if len(flattened) == 0:
+        return []
+
+    distance_sort_idx = np.argsort([i["distance"] for i in flattened])
+    flattened = [flattened[i] for i in distance_sort_idx]
+
+    if maximum_chars:
+        cumsizes = np.cumsum([len(i["content"]) for i in flattened])
+        maximum = np.searchsorted(cumsizes, maximum_chars)
+        if temp_n_results:
+            maximum = min(maximum, temp_n_results)
+    else:
+        maximum = temp_n_results
+    flattened = flattened[:maximum]
+
+    return flattened
 
 
 def query_by_metadata(query_dict, collection="default", count: int = 5, **kwargs):

@@ -20,7 +20,8 @@ dependencies = [
     "markdownify",
     "numpy",
     "sentence_transformers",
-    "pymupdf"
+    "pymupdf",
+    "tqdm"
 ]
 
 
