@@ -48,7 +48,7 @@ CUSTOM_CHROMA_INIT = config("CUSTOM_CHROMA_INIT", default=None)
 Can be used to connect to a remote
 """
 
-DELETE_THRESHOLD = config("DELETE_THRESHOLD", default=30, cast=int)
+DELETE_THRESHOLD = config("DELETE_THRESHOLD", default=100, cast=int)
 """Chunks/texts under this limit will not be stored in the database.
 """
 

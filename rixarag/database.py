@@ -23,7 +23,10 @@ class GPUEmbeddings(EmbeddingFunction[Documents]):
         self._normalize_embeddings = normalize_embeddings
         if not _model:
             from sentence_transformers import SentenceTransformer
-            _model = SentenceTransformer(model)
+            if settings.FORCE_DEVICE:
+                _model = SentenceTransformer(model, device=settings.FORCE_DEVICE)
+            else:
+                _model = SentenceTransformer(model)
 
     def encode(self, input ):
         return _model.encode(
@@ -60,10 +63,10 @@ class RagDB:
         self.sentence_transformer_ef = GPUEmbeddings(model=settings.EMBEDDING_MODEL, normalize_embeddings=False)
         # embedding_functions.SentenceTransformerEmbeddingFunction(model_name=settings.EMBEDDING_MODEL, device=device)
         if settings.CHROMA_PERSISTENCE_PATH == "" or settings.CHROMA_PERSISTENCE_PATH is None:
-            self.client = chromadb.Client(settings=Settings(allow_reset=True))
+            self.client = chromadb.Client(settings=Settings(allow_reset=True,anonymized_telemetry=False))
         else:
             self.client = chromadb.PersistentClient(path=settings.CHROMA_PERSISTENCE_PATH,
-                                                    settings=Settings(allow_reset=True))
+                                                    settings=Settings(allow_reset=True,anonymized_telemetry=False))
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
