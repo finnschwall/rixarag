@@ -1,4 +1,4 @@
-import re
+import regex as re
 import xml.etree.ElementTree as ET
 import sys
 
@@ -9,20 +9,24 @@ def parse_wiki_xml(path):
     These can be obtained from here https://en.wikipedia.org/wiki/Special:Export
     """
     # check for python version
-    if sys.version_info[0] < 3 or sys.version_info[1] < 11:
-        raise Exception("Python 3.11 or higher is required for the wikipedia parser")
+    # if sys.version_info[0] < 3 or sys.version_info[1] < 11:
+    #     raise Exception("Python 3.11 or higher is required for the wikipedia parser")
 
     from . import regex_parser
     tree = ET.parse(path)
+
     root = tree.getroot()
     entities = []
+    # TODO dynamic matching for version
     for page in root[1:]:
-
-        text = page.find("{http://www.mediawiki.org/xml/export-0.10/}revision").find(
-            "{http://www.mediawiki.org/xml/export-0.10/}text").text
-        title = page.find("{http://www.mediawiki.org/xml/export-0.10/}title").text
-        id = page.find("{http://www.mediawiki.org/xml/export-0.10/}id").text
-        if "Category:" in title:
+        try:
+            text = page.find("{http://www.mediawiki.org/xml/export-0.11/}revision").find(
+                "{http://www.mediawiki.org/xml/export-0.11/}text").text
+            title = page.find("{http://www.mediawiki.org/xml/export-0.11/}title").text
+            id = page.find("{http://www.mediawiki.org/xml/export-0.11/}id").text
+            if "Category:" in title:
+                continue
+        except:
             continue
 
         def repl(matchobj):
@@ -73,11 +77,11 @@ def parse_wiki_xml(path):
             #           "url": f"https://en.wikipedia.org/?curid={id}#" + "_".join(i.split(" ")),
             #           "subheader": i}
             content = i + ":\n" + text
-            metadata = {"id":regex_parser.generate_id(content),
+            metadata = {
                         "url": f"https://en.wikipedia.org/?curid={id}#" + "_".join(i.split(" ")),
                         "document_title" : title, "title": i, "source": "wikipedia",
-                        "content_type": "text"
+                        "content_type": "text", "authors":"wikipedia"
                         }
-            entity = {"text": content, "metadata": metadata}
+            entity = {"text": content, "metadata": metadata, "id":regex_parser.generate_id(content)}
             entities.append(entity)
     return entities

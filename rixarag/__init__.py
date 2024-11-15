@@ -5,7 +5,5 @@ except Exception as e:
     import sys
 
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-    print(e)
-
 from . import parsing
 from . import pipelines

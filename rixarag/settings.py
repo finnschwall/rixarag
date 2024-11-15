@@ -33,6 +33,7 @@ See [this](https://huggingface.co/spaces/mteb/leaderboard) leaderboard for more 
 Especially for non-enlgish languages, you might want to choose a different model.
 """
 
+
 FORCE_DEVICE = config("FORCE_DEVICE", default=None)
 """Will manually set the device= of the sentence transformer model.
 If none sentence transformer will choose the device automatically.

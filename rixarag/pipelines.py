@@ -13,7 +13,7 @@ import time
 from markdownify import markdownify as md
 import pymupdf
 from typing import Union, List
-
+from urllib.parse import urlparse
 
 def latex_pipeline(path, document_title=None, collection="default", caption_images=False, working_directory=None,
                    original_pdf=None,
@@ -251,10 +251,10 @@ def html_pipeline(path=None, html_texts: List = None, collection="default", base
     :return: None or list of processed chunks
     """
     html_contents = []
+    meta = []
     if path:
         html_files = []
         urls = []
-        meta = []
         if os.path.isdir(path):
             for file in glob.glob(os.path.join(path, "*.html")):
                 html_files.append(file)
@@ -284,11 +284,16 @@ def html_pipeline(path=None, html_texts: List = None, collection="default", base
                     meta_single.update(additional_metadata)
                 else:
                     meta_single.update(additional_metadata[i])
-            meta.append(meta_single)
+
 
             if os.path.exists(html_file+".metadata.json"):
                 with open(html_file+".metadata.json", "r") as f:
                     meta_single.update(json.load(f))
+
+            if "authors" not in meta_single and "publisher" not in meta_single and "url" in meta_single:
+                meta_single["publisher"] = urlparse(meta_single["url"]).netloc.replace("www.", "")
+            meta.append(meta_single)
+
     elif html_texts:
         if isinstance(html_texts, str):
             html_texts = [html_texts]
@@ -466,8 +471,10 @@ def read_jsons(path, collection, first_is_metadata=True, skip_keys=None):
                         chunk = {"text": entry["text"] if "text" in entry else entry["content"], "metadata": metadata.copy()}
                         # now we add any other keys as metadata
                         for key in entry:
-                            if key not in ["text", "content"]:
+                            if key not in ["text", "content", "metadata"]:
                                 chunk["metadata"][key] = entry[key]
+                        if "metadata" in entry:
+                            chunk["metadata"].update(entry["metadata"])
                         rename_dic = {"source_url": "url", "header": "title"}
                         for old, new in rename_dic.items():
                             if old in chunk["metadata"]:

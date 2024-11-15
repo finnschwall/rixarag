@@ -12,6 +12,11 @@ from typing import Any, Dict, cast
 import numpy as np
 _model = None
 
+import logging
+
+faulty_logger = logging.getLogger("chromadb.telemetry.product.posthog")
+faulty_logger.setLevel(logging.CRITICAL)
+
 
 class GPUEmbeddings(EmbeddingFunction[Documents]):
     """
@@ -131,6 +136,7 @@ def add_processed_chunks(processed_chunks, collection_name):
                 for char in problematic_characters:
                     new_value = new_value.replace(char, "")
                 metadata[key] = new_value
+        metadata["id"] = chunk["id"]
 
 
         if "images" in chunk:
@@ -145,7 +151,7 @@ def add_processed_chunks(processed_chunks, collection_name):
                     ids=[hex(abs(hash(image["transcription"])))[2:]]
                 )
         if settings.DELETE_THRESHOLD:
-            if chunk["metadata"]["size"] < settings.DELETE_THRESHOLD:
+            if len(chunk["text"]) < settings.DELETE_THRESHOLD:
                 continue
         collection.upsert(
             documents=[chunk["text"]],
