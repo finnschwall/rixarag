@@ -79,7 +79,6 @@ def latex_pipeline(path, document_title=None, collection="default", caption_imag
         doc.close()
         if not document_title or document_title == "":
             raise ValueError("Could not extract title from PDF. Please provide document_title manually.")
-
     # check if path is .tex or folder
     tex_files = []
 
@@ -121,6 +120,9 @@ def latex_pipeline(path, document_title=None, collection="default", caption_imag
         for i in processed_chunks:
             if i["metadata"]["page"] == "Error":
                 total_errors += 1
+            if original_pdf:
+                i["metadata"]["source_full_path"] = original_pdf
+                i["metadata"]["source_file"] = os.path.basename(original_pdf)
         if total_errors > 0:
             print(f"Failed to match {total_errors} chunks entirely.")
 
@@ -276,7 +278,7 @@ def html_pipeline(path=None, html_texts: List = None, collection="default", base
             #     html = f.read()
             html_contents.append(md(html))
         for i, html_file in enumerate(html_files):
-            meta_single = {"source_file": os.path.basename(html_file)}
+            meta_single = {"source_file": os.path.basename(html_file), "source_full_path": html_file}
             if len(urls) >0:
                 meta_single["url"] = urls[i]
             if additional_metadata:
@@ -292,6 +294,8 @@ def html_pipeline(path=None, html_texts: List = None, collection="default", base
 
             if "authors" not in meta_single and "publisher" not in meta_single and "url" in meta_single:
                 meta_single["publisher"] = urlparse(meta_single["url"]).netloc.replace("www.", "")
+            if "title" in meta_single and not "document_title" in meta_single:
+                meta_single["document_title"] = meta_single["title"]
             meta.append(meta_single)
 
     elif html_texts:

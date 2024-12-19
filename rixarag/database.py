@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import time
@@ -11,6 +12,8 @@ from chromadb import Documents, EmbeddingFunction, Embeddings
 from typing import Any, Dict, cast
 import numpy as np
 _model = None
+from sentence_transformers import CrossEncoder
+
 
 import logging
 
@@ -72,6 +75,8 @@ class RagDB:
         else:
             self.client = chromadb.PersistentClient(path=settings.CHROMA_PERSISTENCE_PATH,
                                                     settings=Settings(allow_reset=True,anonymized_telemetry=False))
+        if settings.USE_CROSS_ENCODER:
+            self.cross_encoder = CrossEncoder(settings.CROSS_ENCODER_MODEL, device=settings.FORCE_DEVICE)
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -118,6 +123,8 @@ def add_processed_chunks(processed_chunks, collection_name):
     collection = ragdb.client.get_or_create_collection(name=collection_name,
                                                        embedding_function=ragdb.sentence_transformer_ef,
                                                        metadata={"hnsw:space": "cosine"})
+    unique_documents = {}
+    used_metadata_keys = set()
     for chunk in tqdm(processed_chunks):
         # could be done in one go but a progress bar is nice
 
@@ -137,6 +144,19 @@ def add_processed_chunks(processed_chunks, collection_name):
                     new_value = new_value.replace(char, "")
                 metadata[key] = new_value
         metadata["id"] = chunk["id"]
+        # used_metadata_keys.update(metadata.keys())
+        if "document_id" in metadata:
+            if not metadata["document_id"] in unique_documents:
+                doc_meta = metadata
+                doc_id = metadata["document_id"]
+                relevant = ["source_type", "source_file", "source", "document_title", "authors", "url", "content_type",
+                            "publisher", "timestamp", "type", "date", "date_published","info", "creation_date"]
+                doc_dic = {}
+                for key in relevant:
+                    if key in doc_meta:
+                        doc_dic[key] = doc_meta[key]
+                unique_documents[doc_id] = doc_meta
+
 
 
         if "images" in chunk:
@@ -158,6 +178,23 @@ def add_processed_chunks(processed_chunks, collection_name):
             metadatas=[metadata],
             ids=[chunk["id"]]
         )
+    if settings.CHROMA_PERSISTENCE_PATH:
+        # metapath = settings.CHROMA_PERSISTENCE_PATH + "/metadata.txt"
+        # with open(metapath, "a") as f:
+        #     f.write(str(used_metadata_keys)+"\n")
+        document_path = settings.CHROMA_PERSISTENCE_PATH + "/documents.json"
+        try:
+            if os.path.exists(document_path):
+                with open(document_path, "r+") as f:
+                    previous = json.loads(f.read())
+                    previous.update(unique_documents)
+                    f.seek(0)
+                    f.write(json.dumps(previous))
+            else:
+                with open(document_path, "w") as f:
+                    f.write(json.dumps(unique_documents))
+        except Exception as e:
+            print(f"Encountered error while writing document metadata. This does not affect the database. {e}")
 
 
 def query(query_str: str, collection="default", n_results: int = 5, max_distance = 0.75, kwargs: Dict[str, Any] = {},):
@@ -191,7 +228,7 @@ def query(query_str: str, collection="default", n_results: int = 5, max_distance
     return filtered_data
 
 def query_inverted(query_str: str, collection="default", n_results: int = None, max_distance = 0.75,
-                   kwargs: Dict[str, Any] = {}, maximum_chars=4000):
+                   kwargs: Dict[str, Any] = {}, maximum_chars=4000, minimum_cross_encoder_score=0.05):
     """
     Query returns a dict with lists as values, this returns a list of dicts
     Also this supports maximum_chars as an alternative to n_results.
@@ -206,20 +243,27 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
     :param kwargs:
     :return:
     """
+    # TODO good values for max_distance and minimum_cross_encoder_score
     if n_results is None and maximum_chars is None:
         raise ValueError("Either n_results or maximum_chars must be set")
-    temp_n_results = n_results
-    if maximum_chars:
+
+    if maximum_chars and n_results is None:
         # assume 700 chars per chunk and account for variation
         n_results = maximum_chars//700 + 5
+    if maximum_chars and n_results:
+        n_results = max(n_results, maximum_chars//700 + 5)
+    n_results_query = n_results
+    if settings.USE_CROSS_ENCODER:
+        n_results_query = n_results*4
+    temp_n_results = n_results
     results_arr = []
     if isinstance(collection, list):
         n_results = n_results // len(collection)
         for col in collection:
-            results = query(query_str, col, n_results, max_distance, kwargs)
+            results = query(query_str, col, n_results_query, max_distance, kwargs)
             results_arr.append(results)
     else:
-        results = query(query_str, collection, n_results, max_distance, kwargs)
+        results = query(query_str, collection, n_results_query, max_distance, kwargs)
         results_arr.append(results)
     flattened = []
     for results in results_arr:
@@ -252,8 +296,16 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
     if len(flattened) == 0:
         return []
 
-    distance_sort_idx = np.argsort([i["distance"] for i in flattened])
-    flattened = [flattened[i] for i in distance_sort_idx]
+    if settings.USE_CROSS_ENCODER:
+        ragdb = RagDB()
+        texts = [i["content"] for i in flattened]
+        indices = ragdb.cross_encoder.rank(query_str, texts, return_documents=False, top_k=n_results)
+        # TODO add a minimum cross encoder score
+        indices = [i for i in indices if i["score"] > minimum_cross_encoder_score]
+        flattened = [flattened[i["corpus_id"]] for i in indices]
+    else:
+        distance_sort_idx = np.argsort([i["distance"] for i in flattened])
+        flattened = [flattened[i] for i in distance_sort_idx]
 
     if maximum_chars:
         cumsizes = np.cumsum([len(i["content"]) for i in flattened])

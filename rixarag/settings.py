@@ -33,6 +33,8 @@ See [this](https://huggingface.co/spaces/mteb/leaderboard) leaderboard for more 
 Especially for non-enlgish languages, you might want to choose a different model.
 """
 
+USE_CROSS_ENCODER = config("USE_CROSS_ENCODER", default=True, cast=bool)
+CROSS_ENCODER_MODEL = config("CROSS_ENCODER_MODEL", default="mixedbread-ai/mxbai-rerank-base-v1", cast=str)
 
 FORCE_DEVICE = config("FORCE_DEVICE", default=None)
 """Will manually set the device= of the sentence transformer model.
