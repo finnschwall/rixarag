@@ -11,9 +11,9 @@ from tqdm import tqdm
 from chromadb import Documents, EmbeddingFunction, Embeddings
 from typing import Any, Dict, cast
 import numpy as np
+
 _model = None
 from sentence_transformers import CrossEncoder
-
 
 import logging
 
@@ -31,12 +31,12 @@ class GPUEmbeddings(EmbeddingFunction[Documents]):
         self._normalize_embeddings = normalize_embeddings
         if not _model:
             from sentence_transformers import SentenceTransformer
-            if settings.FORCE_DEVICE:
-                _model = SentenceTransformer(model, device=settings.FORCE_DEVICE)
+            if settings.FORCE_DEVICE_EMBEDDING_MODEL:
+                _model = SentenceTransformer(model, device=settings.FORCE_DEVICE_EMBEDDING_MODEL)
             else:
                 _model = SentenceTransformer(model)
 
-    def encode(self, input ):
+    def encode(self, input):
         return _model.encode(
             list(input),
             convert_to_numpy=True,
@@ -60,28 +60,46 @@ def load_model():
     """
     GPUEmbeddings(model=settings.EMBEDDING_MODEL, normalize_embeddings=False)
 
+
 class RagDB:
     """
     Singleton class to manage the RagDB client and SentenceTransformer embedding function
     """
-    _instance = None
+    # _instance = None
+    _is_initialized = False
+    _client = None
+    _cross_encoder = None
+    _sentence_transformer_ef = None
+    _value = None
 
     def __init__(self):
+        if RagDB._is_initialized:
+            self.client = RagDB._client
+            self.cross_encoder = RagDB._cross_encoder
+            self.sentence_transformer_ef = RagDB._sentence_transformer_ef
+            self.value = RagDB._value
+            return
+        RagDB._is_initialized = True
         self.value = None
         self.sentence_transformer_ef = GPUEmbeddings(model=settings.EMBEDDING_MODEL, normalize_embeddings=False)
         # embedding_functions.SentenceTransformerEmbeddingFunction(model_name=settings.EMBEDDING_MODEL, device=device)
         if settings.CHROMA_PERSISTENCE_PATH == "" or settings.CHROMA_PERSISTENCE_PATH is None:
-            self.client = chromadb.Client(settings=Settings(allow_reset=True,anonymized_telemetry=False))
+            self.client = chromadb.Client(settings=Settings(allow_reset=True, anonymized_telemetry=False))
         else:
             self.client = chromadb.PersistentClient(path=settings.CHROMA_PERSISTENCE_PATH,
-                                                    settings=Settings(allow_reset=True,anonymized_telemetry=False))
+                                                    settings=Settings(allow_reset=True, anonymized_telemetry=False))
         if settings.USE_CROSS_ENCODER:
-            self.cross_encoder = CrossEncoder(settings.CROSS_ENCODER_MODEL, device=settings.FORCE_DEVICE)
+            self.cross_encoder = CrossEncoder(settings.CROSS_ENCODER_MODEL, device=settings.FORCE_DEVICE_CROSS_ENCODER
+                                              ,automodel_args=({"torch_dtype": "float16"}))
+            RagDB._cross_encoder = self.cross_encoder
+        RagDB._client = self.client
+        RagDB._sentence_transformer_ef = self.sentence_transformer_ef
+        RagDB._value = self.value
 
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(RagDB, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
+    # def __new__(cls, *args, **kwargs):
+    #     if cls._instance is None:
+    #         cls._instance = super(RagDB, cls).__new__(cls, *args, **kwargs)
+    #     return cls._instance
 
 
 def get_chroma_client():
@@ -150,14 +168,12 @@ def add_processed_chunks(processed_chunks, collection_name):
                 doc_meta = metadata
                 doc_id = metadata["document_id"]
                 relevant = ["source_type", "source_file", "source", "document_title", "authors", "url", "content_type",
-                            "publisher", "timestamp", "type", "date", "date_published","info", "creation_date"]
+                            "publisher", "timestamp", "type", "date", "date_published", "info", "creation_date"]
                 doc_dic = {}
                 for key in relevant:
                     if key in doc_meta:
                         doc_dic[key] = doc_meta[key]
                 unique_documents[doc_id] = doc_meta
-
-
 
         if "images" in chunk:
             for image in chunk["images"]:
@@ -197,7 +213,7 @@ def add_processed_chunks(processed_chunks, collection_name):
             print(f"Encountered error while writing document metadata. This does not affect the database. {e}")
 
 
-def query(query_str: str, collection="default", n_results: int = 5, max_distance = 0.75, kwargs: Dict[str, Any] = {},):
+def query(query_str: str, collection="default", n_results: int = 5, max_distance=0.75, kwargs: Dict[str, Any] = {}, ragdb=None):
     """
     Query the ChromaDB
 
@@ -208,7 +224,9 @@ def query(query_str: str, collection="default", n_results: int = 5, max_distance
     :param kwargs: additional keyword arguments to pass to the query function of chromadb
     """
     # TODO what effect does the embedding function have on max_distance?
-    ragdb = RagDB()
+    if not ragdb:
+        #use already retrieved instance
+        ragdb = RagDB()
     collection = ragdb.client.get_collection(name=collection)
     embedding = ragdb.sentence_transformer_ef([query_str])
     results = collection.query(embedding, n_results=n_results, **kwargs)
@@ -227,8 +245,9 @@ def query(query_str: str, collection="default", n_results: int = 5, max_distance
             filtered_data[key] = results[key]
     return filtered_data
 
-def query_inverted(query_str: str, collection="default", n_results: int = None, max_distance = 0.75,
-                   kwargs: Dict[str, Any] = {}, maximum_chars=4000, minimum_cross_encoder_score=0.05):
+
+def query_inverted(query_str: str, collection="default", n_results: int = None, max_distance=0.75,
+                   kwargs: Dict[str, Any] = {}, maximum_chars=4000, minimum_cross_encoder_score=0.05, maximum_cross_encoder_entries = None):
     """
     Query returns a dict with lists as values, this returns a list of dicts
     Also this supports maximum_chars as an alternative to n_results.
@@ -243,28 +262,34 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
     :param kwargs:
     :return:
     """
+    import time
+    start_time = time.time()
+    ragdb = RagDB()
+    # print("TIME 0", time.time() - start_time)
     # TODO good values for max_distance and minimum_cross_encoder_score
     if n_results is None and maximum_chars is None:
         raise ValueError("Either n_results or maximum_chars must be set")
 
     if maximum_chars and n_results is None:
         # assume 700 chars per chunk and account for variation
-        n_results = maximum_chars//700 + 5
+        n_results = maximum_chars // 700 + 5
     if maximum_chars and n_results:
-        n_results = max(n_results, maximum_chars//700 + 5)
+        n_results = max(n_results, maximum_chars // 700 + 5)
     n_results_query = n_results
     if settings.USE_CROSS_ENCODER:
-        n_results_query = n_results*4
+        n_results_query = n_results * 4
     temp_n_results = n_results
     results_arr = []
+    # print("TIME A", time.time() - start_time)
     if isinstance(collection, list):
         n_results = n_results // len(collection)
         for col in collection:
-            results = query(query_str, col, n_results_query, max_distance, kwargs)
+            results = query(query_str, col, n_results_query, max_distance, kwargs, ragdb=ragdb)
             results_arr.append(results)
     else:
-        results = query(query_str, collection, n_results_query, max_distance, kwargs)
+        results = query(query_str, collection, n_results_query, max_distance, kwargs, ragdb = ragdb)
         results_arr.append(results)
+    # print("TIME B", time.time() - start_time)
     flattened = []
     for results in results_arr:
         if not results or not any(results.values()):
@@ -287,7 +312,7 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
             inverted[i].update(inverted[i]["metadatas"])
             del inverted[i]["metadatas"]
 
-        rename_dic = {"ids": "id", "documents": "content",  "distances": "distance", "embeddings": "embedding"}
+        rename_dic = {"ids": "id", "documents": "content", "distances": "distance", "embeddings": "embedding"}
         for entry in inverted:
             for key, value in rename_dic.items():
                 if key in entry:
@@ -295,18 +320,23 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
         flattened.extend(inverted)
     if len(flattened) == 0:
         return []
+    # print("TIME C", time.time() - start_time)
 
     if settings.USE_CROSS_ENCODER:
-        ragdb = RagDB()
+
+        # print("TIME C1", time.time() - start_time)
         texts = [i["content"] for i in flattened]
+        if maximum_cross_encoder_entries:
+            texts = texts[:maximum_cross_encoder_entries]
         indices = ragdb.cross_encoder.rank(query_str, texts, return_documents=False, top_k=n_results)
+        # print("TIME C2", time.time() -start_time)
         # TODO add a minimum cross encoder score
         indices = [i for i in indices if i["score"] > minimum_cross_encoder_score]
         flattened = [flattened[i["corpus_id"]] for i in indices]
     else:
         distance_sort_idx = np.argsort([i["distance"] for i in flattened])
         flattened = [flattened[i] for i in distance_sort_idx]
-
+    # print("TIME D", time.time() - start_time)
     if maximum_chars:
         cumsizes = np.cumsum([len(i["content"]) for i in flattened])
         maximum = np.searchsorted(cumsizes, maximum_chars)
@@ -315,7 +345,7 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
     else:
         maximum = temp_n_results
     flattened = flattened[:maximum]
-
+    # print("TIME E", time.time() - start_time)
     return flattened
 
 
@@ -342,9 +372,10 @@ def query_by_metadata(query_dict, collection="default", count: int = 5, **kwargs
         results = collection.get(where=new_query_dict, limit=count, **kwargs)
     return results
 
+
 def get_random_elements(count=5, collection="default"):
     """
-    Get random elements from the ChromaDB
+    Get subsequent elements from the ChromaDB starting at a random position
 
     :param count: the number of elements to return
     :param collection_name: the name of the collection to query
@@ -357,6 +388,49 @@ def get_random_elements(count=5, collection="default"):
         limit=count,
         offset=start_index
     )
+
+
+def get_random_elements_inverted(count=5, collection="default"):
+    """
+    Get random elements in inverted format
+
+    :param count:
+    :param collection:
+    :return:
+    """
+    ragdb = RagDB()
+    collection = ragdb.client.get_collection(name=collection)
+    maximum = collection.count()
+    res_arr = []
+    for i in range(count):
+        start_index = random.randint(0, maximum - count)
+        res_arr.append(collection.get(
+            limit=1,
+            offset=start_index
+        ))
+    inverted = []
+    for results in res_arr:
+        if "included" in results:
+            del results["included"]
+        length = len(results["ids"])
+        if length == 0:
+            return []
+        for i in range(length):
+            entry = {}
+            for key, value in results.items():
+                if value:
+                    entry[key] = value[i]
+            inverted.append(entry)
+
+    for i in range(count):
+        inverted[i].update(inverted[i]["metadatas"])
+        del inverted[i]["metadatas"]
+    rename_dic = {"ids": "id", "documents": "content", "distances": "distance", "embeddings": "embedding"}
+    for entry in inverted:
+        for key, value in rename_dic.items():
+            if key in entry:
+                entry[value] = entry.pop(key)
+    return inverted
 
 
 def list_collections(raw=False):

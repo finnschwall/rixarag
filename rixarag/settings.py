@@ -34,13 +34,14 @@ Especially for non-enlgish languages, you might want to choose a different model
 """
 
 USE_CROSS_ENCODER = config("USE_CROSS_ENCODER", default=True, cast=bool)
-CROSS_ENCODER_MODEL = config("CROSS_ENCODER_MODEL", default="mixedbread-ai/mxbai-rerank-base-v1", cast=str)
+CROSS_ENCODER_MODEL = config("CROSS_ENCODER_MODEL", default="mixedbread-ai/mxbai-rerank-xsmall-v1", cast=str)
 
-FORCE_DEVICE = config("FORCE_DEVICE", default=None)
+FORCE_DEVICE_CROSS_ENCODER = config("FORCE_DEVICE", default=None)
 """Will manually set the device= of the sentence transformer model.
 If none sentence transformer will choose the device automatically.
-Can be used e.g. to prevent the model from using the GPU.
 """
+
+FORCE_DEVICE_EMBEDDING_MODEL = config("FORCE_DEVICE_EMBEDDING_MODEL", default=None)
 
 CHROMA_PERSISTENCE_PATH = config("CHROMA_PERSISTENCE_PATH", default="", cast=str)
 """ The path to the chroma database. If empty, the database will be stored in memory.

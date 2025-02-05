@@ -470,6 +470,7 @@ def read_jsons(path, collection, first_is_metadata=True, skip_keys=None):
                         entries = entries[1:]
                     else:
                         metadata = {}
+                    metadata["document_id"] = regex_parser.generate_id(os.path.join(root, file))
                     chunks = []
                     for entry in entries:
                         chunk = {"text": entry["text"] if "text" in entry else entry["content"], "metadata": metadata.copy()}
