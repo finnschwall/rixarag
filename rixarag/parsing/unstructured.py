@@ -52,8 +52,8 @@ def parse_unstructured_output(unstructured_json):
                 end_context = " ".join(end_context)
                 images.append({"base64": im, "start_context": start_context, "end_context": end_context})
             pages.append(metadata["page_number"])
-
-        processed_chunk = {"text": chunk["text"], "id": hex(abs(hash(chunk["text"])))}
+        from . import regex_parser
+        processed_chunk = {"text": chunk["text"], "id":regex_parser.generate_id(chunk["text"])}
 
         if min(pages) == max(pages):
             page = str(min(pages))

@@ -36,7 +36,7 @@ Especially for non-enlgish languages, you might want to choose a different model
 USE_CROSS_ENCODER = config("USE_CROSS_ENCODER", default=True, cast=bool)
 CROSS_ENCODER_MODEL = config("CROSS_ENCODER_MODEL", default="mixedbread-ai/mxbai-rerank-xsmall-v1", cast=str)
 
-FORCE_DEVICE_CROSS_ENCODER = config("FORCE_DEVICE", default=None)
+FORCE_DEVICE_CROSS_ENCODER = config("FORCE_DEVICE_CROSS_ENCODER", default=None)
 """Will manually set the device= of the sentence transformer model.
 If none sentence transformer will choose the device automatically.
 """

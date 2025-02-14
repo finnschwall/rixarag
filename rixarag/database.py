@@ -89,8 +89,11 @@ class RagDB:
             self.client = chromadb.PersistentClient(path=settings.CHROMA_PERSISTENCE_PATH,
                                                     settings=Settings(allow_reset=True, anonymized_telemetry=False))
         if settings.USE_CROSS_ENCODER:
-            self.cross_encoder = CrossEncoder(settings.CROSS_ENCODER_MODEL, device=settings.FORCE_DEVICE_CROSS_ENCODER
-                                              ,automodel_args=({"torch_dtype": "float16"}))
+            kwargs = {}
+            if settings.FORCE_DEVICE_CROSS_ENCODER:
+                kwargs["device"] = settings.FORCE_DEVICE_CROSS_ENCODER
+                kwargs["automodel_args"] = ({"torch_dtype": "float16"})
+            self.cross_encoder = CrossEncoder(settings.CROSS_ENCODER_MODEL, **kwargs)
             RagDB._cross_encoder = self.cross_encoder
         RagDB._client = self.client
         RagDB._sentence_transformer_ef = self.sentence_transformer_ef
@@ -247,7 +250,7 @@ def query(query_str: str, collection="default", n_results: int = 5, max_distance
 
 
 def query_inverted(query_str: str, collection="default", n_results: int = None, max_distance=0.75,
-                   kwargs: Dict[str, Any] = {}, maximum_chars=4000, minimum_cross_encoder_score=0.05, maximum_cross_encoder_entries = None):
+                   kwargs: Dict[str, Any] = {}, maximum_chars=4500, minimum_cross_encoder_score=0.05, maximum_cross_encoder_entries = None):
     """
     Query returns a dict with lists as values, this returns a list of dicts
     Also this supports maximum_chars as an alternative to n_results.
@@ -277,7 +280,7 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
         n_results = max(n_results, maximum_chars // 700 + 5)
     n_results_query = n_results
     if settings.USE_CROSS_ENCODER:
-        n_results_query = n_results * 4
+        n_results_query = n_results * 3
     temp_n_results = n_results
     results_arr = []
     # print("TIME A", time.time() - start_time)
@@ -329,14 +332,17 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
         if maximum_cross_encoder_entries:
             texts = texts[:maximum_cross_encoder_entries]
         indices = ragdb.cross_encoder.rank(query_str, texts, return_documents=False, top_k=n_results)
+
         # print("TIME C2", time.time() -start_time)
         # TODO add a minimum cross encoder score
         indices = [i for i in indices if i["score"] > minimum_cross_encoder_score]
         flattened = [flattened[i["corpus_id"]] for i in indices]
+        for i in range(len(flattened)):
+            flattened[i]["cross_encoder_score"] = indices[i]["score"].item()
     else:
         distance_sort_idx = np.argsort([i["distance"] for i in flattened])
         flattened = [flattened[i] for i in distance_sort_idx]
-    # print("TIME D", time.time() - start_time)
+
     if maximum_chars:
         cumsizes = np.cumsum([len(i["content"]) for i in flattened])
         maximum = np.searchsorted(cumsizes, maximum_chars)
@@ -345,7 +351,7 @@ def query_inverted(query_str: str, collection="default", n_results: int = None, 
     else:
         maximum = temp_n_results
     flattened = flattened[:maximum]
-    # print("TIME E", time.time() - start_time)
+
     return flattened
 
 
