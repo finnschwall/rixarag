@@ -16,3 +16,5 @@ rixarag/parsing/regex_parser.py
 rixarag/parsing/semantic_chunking.py
 rixarag/parsing/unstructured.py
 rixarag/parsing/wikipedia.py
+rixarag/tools/__init__.py
+rixarag/tools/webscraper.py

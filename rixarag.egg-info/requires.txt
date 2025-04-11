@@ -4,3 +4,5 @@ openai
 markdownify
 numpy
 sentence_transformers
+pymupdf
+tqdm
